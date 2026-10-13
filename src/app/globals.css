@@ -1332,3 +1332,28 @@ a {
     animation-iteration-count: 1 !important;
   }
 }
+
+.portfolio {
+  counter-reset: sec;
+}
+
+.section-kicker::before {
+  counter-increment: sec;
+  content: counter(sec, decimal-leading-zero) " · ";
+}
+
+@media (min-width: 900px) {
+  .projects-pin {
+    padding-top: 90px;
+    box-sizing: border-box;
+  }
+  .projects-pin .section-head {
+    margin-bottom: 28px;
+  }
+  .project-media {
+    aspect-ratio: 21 / 8;
+  }
+  .project-body {
+    padding: 20px 24px;
+  }
+}

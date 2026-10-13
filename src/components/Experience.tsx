@@ -49,8 +49,8 @@ export default function Experience({ content }: { content: SiteContent }) {
     { a: 0.245, b: 0.355, eyebrow: "22.98° N · 87.85° E", title: "West Bengal", sub: "The land of the Hooghly" },
     { a: 0.365, b: 0.47, eyebrow: "22.31° N · 87.31° E", title: campusName, sub: "The first IIT · est. 1951" },
     { a: 0.505, b: 0.645, eyebrow: "Hall of Residence", title: hallName, sub: "Home, for five years of dual degree" },
-    { a: 0.69, b: 0.79, eyebrow: "Room", title: roomLabel, sub: "Where the late-night builds happen" },
-    { a: 0.795, b: 0.875, eyebrow: "", title: "Let me show you my work", sub: "" },
+    { a: 0.69, b: 0.815, eyebrow: "Knock knock", title: roomLabel, sub: "Where the late-night builds happen" },
+    { a: 0.825, b: 0.885, eyebrow: "", title: "Let me show you my work", sub: "" },
   ];
 
   // --- Smooth scrolling shared by both modes --------------------------------
@@ -142,7 +142,7 @@ export default function Experience({ content }: { content: SiteContent }) {
         el.style.visibility = o <= 0.001 ? "hidden" : "visible";
       });
       if (whiteRef.current) whiteRef.current.style.opacity = String(bump(p, 0.45, 0.53));
-      if (darkRef.current) darkRef.current.style.opacity = String(bump(p, 0.64, 0.71));
+      if (darkRef.current) darkRef.current.style.opacity = String(bump(p, 0.655, 0.695));
       if (hintRef.current) hintRef.current.style.opacity = String(1 - range(p, 0, 0.02));
       if (barRef.current) barRef.current.style.transform = `scaleX(${p})`;
       if (hudRef.current) hudRef.current.style.opacity = String(1 - ease(p, 0.915, 0.95));

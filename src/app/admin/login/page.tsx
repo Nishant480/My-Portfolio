@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth, isAdminEmail } from "@/auth";
 import { signInAction } from "../actions";
@@ -33,9 +34,9 @@ export default async function LoginPage({ searchParams }: PageProps<"/admin/logi
             Continue with Google
           </button>
         </form>
-        <a className="login-back" href="/">
+        <Link className="login-back" href="/">
           ← Back to the site
-        </a>
+        </Link>
       </div>
     </main>
   );

@@ -346,7 +346,7 @@ function SectionSwitch({
       return <About title={title} content={content} />;
     case "education":
       return (
-        <Section id="education" title={title} kicker="01 · Learning">
+        <Section id="education" title={title} kicker="Learning">
           <div className="timeline">
             <div className="timeline-spine" />
             {content.education.map((e, i) => (
@@ -374,7 +374,7 @@ function SectionSwitch({
     case "experience":
       if (!content.experience.length) return null;
       return (
-        <Section id="experience" title={title} kicker="02 · Work">
+        <Section id="experience" title={title} kicker="Work">
           <div className="timeline">
             <div className="timeline-spine" />
             {content.experience.map((e, i) => (
@@ -401,7 +401,7 @@ function SectionSwitch({
     case "research":
       if (!content.research.length) return null;
       return (
-        <Section id="research" title={title} kicker="04 · Research">
+        <Section id="research" title={title} kicker="Research">
           <div className="grid-2" data-stagger>
             {content.research.map((r, i) => (
               <article key={i} className="card card-glow">
@@ -425,7 +425,7 @@ function SectionSwitch({
     case "achievements":
       if (!content.achievements.length) return null;
       return (
-        <Section id="achievements" title={title} kicker="06 · Milestones">
+        <Section id="achievements" title={title} kicker="Milestones">
           <div className="grid-3" data-stagger>
             {content.achievements.map((a, i) => (
               <article key={i} className="card trophy">
@@ -440,7 +440,7 @@ function SectionSwitch({
     case "positions":
       if (!content.positions.length) return null;
       return (
-        <Section id="positions" title={title} kicker="07 · Leadership">
+        <Section id="positions" title={title} kicker="Leadership">
           <div className="rows">
             {content.positions.map((p, i) => (
               <article key={i} className="row" data-reveal>
@@ -459,7 +459,7 @@ function SectionSwitch({
       );
     case "coursework":
       return (
-        <Section id="coursework" title={title} kicker="08 · Foundations">
+        <Section id="coursework" title={title} kicker="Foundations">
           <Chips items={content.coursework} />
           {content.certifications.length > 0 && (
             <div className="grid-3 mt" data-stagger>
@@ -478,7 +478,7 @@ function SectionSwitch({
     case "extracurricular":
       if (!content.extracurricular.length) return null;
       return (
-        <Section id="extracurricular" title={title} kicker="09 · Life">
+        <Section id="extracurricular" title={title} kicker="Life">
           <div className="grid-2" data-stagger>
             {content.extracurricular.map((t, i) => (
               <p key={i} className="card">
@@ -506,7 +506,7 @@ function About({ title, content }: { title: string; content: SiteContent }) {
   const onLeave = () => gsap.to(tiltRef.current, { rotateX: 0, rotateY: 0, duration: 0.8, ease: "elastic.out(1,0.5)" });
   const p = content.profile;
   return (
-    <Section id="about" title={title} kicker="00 · Hello">
+    <Section id="about" title={title} kicker="Hello">
       <div className="about">
         <div className="about-photo-wrap" onPointerMove={onMove} onPointerLeave={onLeave}>
           <div ref={tiltRef} className="about-photo">
@@ -559,7 +559,7 @@ function Projects({ title, content }: { title: string; content: SiteContent }) {
     <section id="projects" className="section section-projects">
       <div className="projects-pin">
         <div className="section-head">
-          <span className="section-kicker">03 · Things I&apos;ve built</span>
+          <span className="section-kicker">Things I&apos;ve built</span>
           <SplitTitle text={title} />
         </div>
         <div className="projects-track">
@@ -612,7 +612,7 @@ function Projects({ title, content }: { title: string; content: SiteContent }) {
 function Skills({ title, content }: { title: string; content: SiteContent }) {
   const all = content.skills.flatMap((g) => g.items).filter(Boolean);
   return (
-    <Section id="skills" title={title} kicker="05 · Toolbox">
+    <Section id="skills" title={title} kicker="Toolbox">
       <div className="marquee" aria-hidden>
         {[0, 1].map((row) => (
           <div key={row} className={`marquee-row ${row ? "reverse" : ""}`}>
@@ -644,7 +644,7 @@ function Contact({ content, onBackToEarth }: { content: SiteContent; onBackToEar
   const email = content.profile.email;
   return (
     <section id="contact" className="section contact">
-      <p className="section-kicker">10 · Say hi</p>
+      <p className="section-kicker">Say hi</p>
       <h2 className="contact-heading" data-reveal>
         {content.contact.heading}
       </h2>

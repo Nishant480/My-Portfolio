@@ -2,28 +2,32 @@
 
 import { useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import { facadeEmissive, facadeTexture, signTexture } from "./canvasTextures";
+import { facadeEmissive, facadeTexture, glassTexture, podiumTexture, signTexture } from "./canvasTextures";
 
 // Stylised IIT Kharagpur: Atal Bihari Vajpayee Hall in the middle (U-shaped,
 // facing +Z), the Main Building far behind it, roads, trees and other blocks.
 // The glowing window on the front facade is "my room"; the camera flies into it.
 
-export const LIT_WINDOW = new THREE.Vector3(3, 6.2, 3.02);
+// Room 118 is on the first floor of the main tower; its window glows.
+export const LIT_WINDOW = new THREE.Vector3(-4, 4.95, 5.02);
+const ENTRANCE = new THREE.Vector3(6, 1.6, 13);
 
 export const campusCamera = {
   pos: new THREE.CatmullRomCurve3([
-    new THREE.Vector3(60, 170, 190),
-    new THREE.Vector3(36, 70, 100),
-    new THREE.Vector3(12, 20, 42),
-    new THREE.Vector3(4.5, 8, 15),
-    new THREE.Vector3(3, 6.25, 4.0),
+    new THREE.Vector3(70, 170, 210),
+    new THREE.Vector3(40, 72, 115),
+    new THREE.Vector3(12, 24, 55),
+    new THREE.Vector3(-3, 7, 22),
+    new THREE.Vector3(6, 1.8, 19),
+    new THREE.Vector3(6, 1.65, 14.2),
   ]),
   look: new THREE.CatmullRomCurve3([
     new THREE.Vector3(0, 0, -30),
-    new THREE.Vector3(0, 4, -4),
-    new THREE.Vector3(0, 6, 0),
-    new THREE.Vector3(3, 6.2, 2.5),
-    new THREE.Vector3(3, 6.2, 2),
+    new THREE.Vector3(0, 10, -2),
+    new THREE.Vector3(0, 10, 4),
+    LIT_WINDOW.clone(),
+    ENTRANCE.clone(),
+    new THREE.Vector3(6, 1.6, 10),
   ]),
 };
 
@@ -57,7 +61,7 @@ function Trees() {
     for (let i = 0; out.length < 420 && i < 4000; i++) {
       const x = (rand(i) - 0.5) * 380;
       const z = (rand(i + 999) - 0.5) * 380;
-      if (Math.abs(x) < 26 && z > -10 && z < 30) continue; // hall + courtyard
+      if (x > -34 && x < 20 && z > -12 && z < 30) continue; // hall + forecourt
       if (Math.abs(z - 24) < 5) continue; // road
       if (Math.abs(x) < 50 && z < -105 && z > -140) continue; // main building
       out.push([x, z, 0.7 + rand(i + 5) * 0.8]);
@@ -154,72 +158,99 @@ function MainBuilding() {
 }
 
 function Hall({ hallName }: { hallName: string }) {
-  const tex = useMemo(() => {
-    const front = facadeTexture(12, 4, 7, 1);
-    const frontGlow = facadeEmissive(12, 4, 7, 1);
-    const wing = facadeTexture(7, 4, -1, -1);
-    const wingGlow = facadeEmissive(7, 4, -1, -1);
-    const sign = signTexture([hallName, "Hall of Residence · IIT Kharagpur"]);
-    return { front, frontGlow, wing, wingGlow, sign };
-  }, [hallName]);
-
-  const plain = useMemo(() => new THREE.MeshStandardMaterial({ color: "#c96f4a" }), []);
-  const roof = useMemo(() => new THREE.MeshStandardMaterial({ color: "#e8dcc4" }), []);
-  const frontMat = useMemo(
-    () => new THREE.MeshStandardMaterial({ map: tex.front, emissiveMap: tex.frontGlow, emissive: "#ffffff", emissiveIntensity: 1.4 }),
+  const tex = useMemo(
+    () => ({
+      tower: facadeTexture(6, 8, 1, 6, "#ecebe4"),
+      towerGlow: facadeEmissive(6, 8, 1, 6),
+      wing: facadeTexture(4, 6, -1, -1, "#ecebe4"),
+      wingGlow: facadeEmissive(4, 6, -1, -1),
+      podium: podiumTexture(),
+      glass: glassTexture(),
+      sign: signTexture([hallName, "Hall of Residence · IIT Kharagpur"]),
+    }),
+    [hallName],
+  );
+  const white = useMemo(() => new THREE.MeshStandardMaterial({ color: "#e9e7e0" }), []);
+  const peach = useMemo(() => new THREE.MeshStandardMaterial({ color: "#f0c39c" }), []);
+  const trim = useMemo(() => new THREE.MeshStandardMaterial({ color: "#8a5a4a" }), []);
+  const glass = useMemo(
+    () => new THREE.MeshStandardMaterial({ map: tex.glass, metalness: 0.55, roughness: 0.18, color: "#ffffff" }),
     [tex],
   );
-  const wingMat = useMemo(
+  const tower = useMemo(
+    () => new THREE.MeshStandardMaterial({ map: tex.tower, emissiveMap: tex.towerGlow, emissive: "#ffffff", emissiveIntensity: 1.4 }),
+    [tex],
+  );
+  const wing = useMemo(
     () => new THREE.MeshStandardMaterial({ map: tex.wing, emissiveMap: tex.wingGlow, emissive: "#ffffff", emissiveIntensity: 1.2 }),
     [tex],
   );
+  const podium = useMemo(() => new THREE.MeshStandardMaterial({ map: tex.podium }), [tex]);
 
   return (
     <group>
-      {/* Central block: front face (+Z) carries the window grid. */}
-      <mesh position={[0, 5, 0]} material={[plain, plain, roof, plain, frontMat, plain]} castShadow receiveShadow>
-        <boxGeometry args={[24, 10, 6]} />
+      {/* Main white tower, window grid on the front (+Z). */}
+      <mesh position={[0, 13, 0]} material={[white, white, white, white, tower, white]} castShadow receiveShadow>
+        <boxGeometry args={[16, 26, 10]} />
       </mesh>
-      {/* Wings, window grids facing the courtyard. */}
-      <mesh position={[-15, 5, 4]} material={[wingMat, plain, roof, plain, plain, plain]} castShadow receiveShadow>
-        <boxGeometry args={[6, 10, 14]} />
+      <mesh position={[0, 26.3, 0]} material={trim}>
+        <boxGeometry args={[16.4, 0.6, 10.4]} />
       </mesh>
-      <mesh position={[15, 5, 4]} material={[plain, wingMat, roof, plain, plain, plain]} castShadow receiveShadow>
-        <boxGeometry args={[6, 10, 14]} />
+      {/* Blue glass stair towers and the slim beige column. */}
+      <mesh position={[-9.6, 13.3, 1.5]} material={glass} castShadow>
+        <boxGeometry args={[3.2, 26.6, 6]} />
       </mesh>
-      {/* Parapets */}
-      {[[0, 10.3, 0, 24.4, 0.6, 6.4], [-15, 10.3, 4, 6.4, 0.6, 14.4], [15, 10.3, 4, 6.4, 0.6, 14.4]].map((b, i) => (
-        <mesh key={i} position={[b[0], b[1], b[2]]} material={roof}>
-          <boxGeometry args={[b[3], b[4], b[5]]} />
+      <mesh position={[-12.4, 12, 0]} castShadow>
+        <boxGeometry args={[2.6, 24, 8]} />
+        <meshStandardMaterial color="#e8c49a" />
+      </mesh>
+      {/* Second wing behind and to the left. */}
+      <mesh position={[-20, 10, -2]} material={[white, white, white, white, wing, white]} castShadow receiveShadow>
+        <boxGeometry args={[12, 20, 9]} />
+      </mesh>
+      <mesh position={[-26.6, 10.3, -0.5]} material={glass} castShadow>
+        <boxGeometry args={[2.4, 20.6, 5]} />
+      </mesh>
+      {/* Balcony slab on the tower. */}
+      <mesh position={[-6, 18, 6]} material={white} castShadow>
+        <boxGeometry args={[4, 0.4, 2.4]} />
+      </mesh>
+      {/* Peach podium with jali panels and the entrance canopy. */}
+      <mesh position={[6, 3.6, 9]} material={[peach, peach, peach, peach, podium, peach]} castShadow receiveShadow>
+        <boxGeometry args={[16, 7.2, 8]} />
+      </mesh>
+      <mesh position={[6, 7.35, 9]} material={trim}>
+        <boxGeometry args={[16.4, 0.3, 8.4]} />
+      </mesh>
+      <mesh position={[6, 3.0, 14.4]} material={trim} castShadow>
+        <boxGeometry args={[8, 0.35, 2.8]} />
+      </mesh>
+      {[2.4, 9.6].map((x) => (
+        <mesh key={x} position={[x, 1.5, 15.4]} material={peach} castShadow>
+          <boxGeometry args={[0.5, 3, 0.5]} />
         </mesh>
       ))}
-      {/* Entrance: canopy, door and name board. */}
-      <mesh position={[0, 2.8, 4.2]} material={roof} castShadow>
-        <boxGeometry args={[7, 0.3, 2.6]} />
+      {/* Name board on the lawn by the path. */}
+      <mesh position={[-1.5, 1.2, 21]} rotation={[0, 0.35, 0]}>
+        <boxGeometry args={[6.4, 1.8, 0.3]} />
+        <meshStandardMaterial attach="material-0" color="#8a5a4a" />
+        <meshStandardMaterial attach="material-1" color="#8a5a4a" />
+        <meshStandardMaterial attach="material-2" color="#8a5a4a" />
+        <meshStandardMaterial attach="material-3" color="#8a5a4a" />
+        <meshStandardMaterial attach="material-4" map={tex.sign} emissiveMap={tex.sign} emissive="#ffffff" emissiveIntensity={0.35} />
+        <meshStandardMaterial attach="material-5" color="#8a5a4a" />
       </mesh>
-      {[-3.2, 3.2].map((x) => (
-        <mesh key={x} position={[x, 1.4, 5.3]} material={roof}>
-          <cylinderGeometry args={[0.15, 0.15, 2.8]} />
-        </mesh>
-      ))}
-      <mesh position={[0, 1.2, 3.02]}>
-        <planeGeometry args={[2.4, 2.4]} />
-        <meshStandardMaterial color="#3b2a20" />
+      {/* Forecourt and path. */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 16]} receiveShadow>
+        <planeGeometry args={[40, 12]} />
+        <meshStandardMaterial color="#b9a78f" />
       </mesh>
-      <mesh position={[0, 3.9, 3.05]}>
-        <planeGeometry args={[8, 2]} />
-        <meshStandardMaterial map={tex.sign} emissiveMap={tex.sign} emissive="#ffffff" emissiveIntensity={0.35} />
-      </mesh>
-      {/* Lawn and path in the courtyard. */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 11]} receiveShadow>
-        <planeGeometry args={[24, 16]} />
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-12, 0.025, 15]} receiveShadow>
+        <planeGeometry args={[14, 8]} />
         <meshStandardMaterial color="#7fa65a" />
       </mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 13]} receiveShadow>
-        <planeGeometry args={[3, 20]} />
-        <meshStandardMaterial color="#d8c9a6" />
-      </mesh>
-      <pointLight position={[LIT_WINDOW.x, LIT_WINDOW.y, LIT_WINDOW.z + 0.6]} color="#ffcf6e" intensity={6} distance={6} />
+      <pointLight position={[LIT_WINDOW.x, LIT_WINDOW.y, LIT_WINDOW.z + 0.8]} color="#ffcf6e" intensity={8} distance={7} />
+      <pointLight position={[6, 2.6, 15]} color="#ffe2b0" intensity={5} distance={8} />
     </group>
   );
 }
