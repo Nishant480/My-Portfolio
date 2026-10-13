@@ -1354,6 +1354,19 @@ a {
     aspect-ratio: 21 / 8;
   }
   .project-body {
-    padding: 20px 24px;
+    padding: 18px 22px;
+    font-size: 15px;
+  }
+  .project-body h3 {
+    font-size: 24px;
+  }
+  .project {
+    width: min(440px, 80vw);
+  }
+  .project.is-featured {
+    width: min(520px, 84vw);
+  }
+  .projects-pin .section-title {
+    font-size: clamp(36px, 5vw, 72px);
   }
 }
