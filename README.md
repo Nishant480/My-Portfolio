@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Earth → Laptop Portfolio
 
-## Getting Started
+A portfolio that starts as a draggable 3D Earth. Scrolling flies the camera to
+India, West Bengal and IIT Kharagpur, down onto Atal Bihari Vajpayee Hall, through
+the lit window of my room and into the laptop on the study table, whose screen
+expands into the actual portfolio. From there the page scrolls normally; the
+**Back to Earth** button is the only way back to the globe.
 
-First, run the development server:
+Everything on the site is edited from `/admin`, which only the owner's Google
+account can open.
+
+## Stack
+
+- Next.js 16 (App Router), TypeScript
+- React Three Fiber + drei + Three.js for the Earth, campus and room scenes
+- Lenis smooth scrolling, GSAP + ScrollTrigger for the portfolio animations
+- Auth.js (NextAuth v5) with Google, locked to one email (`ADMIN_EMAIL`)
+- Content: one JSON document, stored in Supabase in production or
+  `data/content.json` locally
+
+## Run it locally
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # fill in the values below
+npm run dev                  # http://localhost:3000, admin at /admin
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Admin sign-in setup (Google)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Google Cloud Console → APIs & Services → Credentials → *Create OAuth client ID*
+   (type: Web application).
+2. Authorised redirect URIs:
+   - `http://localhost:3000/api/auth/callback/google`
+   - `https://YOUR-DOMAIN/api/auth/callback/google`
+3. Put the client ID/secret in `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET`,
+   your Gmail in `ADMIN_EMAIL`, and a random `AUTH_SECRET` (`npx auth secret`).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+How the lock works:
+- The Google sign-in callback refuses any account whose verified email isn't
+  `ADMIN_EMAIL`, so no session is ever created for anyone else.
+- `src/proxy.ts` redirects every `/admin` request without the owner session.
+- Every server action re-checks the session (`requireAdmin`) before reading
+  input, and validates content with Zod before saving.
+- Sessions last 8 hours; `/admin` is `noindex`; security headers are set in
+  `next.config.ts`.
 
-## Learn More
+## Content storage (needed on Vercel)
 
-To learn more about Next.js, take a look at the following resources:
+Serverless hosts can't write files, so in production use Supabase:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Create a free Supabase project, run `supabase/schema.sql` in its SQL editor.
+2. Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` (server-only, never
+   exposed to the browser).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Uploads (photo, project images, resume PDF) go to the `portfolio` storage bucket.
 
-## Deploy on Vercel
+## Where things live
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Path | What |
+| --- | --- |
+| `src/components/Experience.tsx` | Journey ↔ portfolio switch, HUD, captions, screen expansion |
+| `src/components/journey/` | 3D scenes: `Earth`, `Campus`, `Room`, camera rig and scroll stages (`store.ts`) |
+| `src/components/portfolio/Portfolio.tsx` | All portfolio sections and their scroll animations |
+| `src/content/` | Content schema and placeholder content |
+| `src/app/admin/` | Login, editor and server actions |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Earth textures: NASA Blue Marble / Black Marble (public domain), via the
+`three-globe` examples.
